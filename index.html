@@ -1,0 +1,777 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sheltech Enclave Tower</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { jakarta: ['Plus Jakarta Sans', 'sans-serif'] },
+          colors: {
+            brand: { 50:'#f0fdf4',100:'#dcfce7',200:'#bbf7d0',300:'#86efac',400:'#4ade80',500:'#22c55e',600:'#16a34a',700:'#15803d',800:'#166534',900:'#14532d' },
+            surface: '#1a1f2e',
+            card: '#232838',
+            accent: '#6366f1'
+          },
+          backgroundColor: {
+            'blue-25': '#f3f7fc',
+            'slate-75': '#f2f4f8'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .sidebar-link.active { background: rgba(59,130,246,0.15); color: #1e40af; border-left: 3px solid #1e40af; }
+    .fade-in { animation: fadeIn 0.4s ease; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+    ::-webkit-scrollbar { width:6px } ::-webkit-scrollbar-track { background:#f8fafc } ::-webkit-scrollbar-thumb { background:#cbd5e1;border-radius:3px } ::-webkit-scrollbar-thumb:hover { background:#94a3b8; }
+    .glass { background: rgba(255,255,255,0.85); backdrop-filter: blur(20px); border: 1px solid rgba(226,232,240,0.4); box-shadow: 0 8px 32px 0 rgba(31,38,135,0.08); }
+    .glass-subtle { background: rgba(248,250,252,0.7); backdrop-filter: blur(16px); border: 1px solid rgba(226,232,240,0.5); }
+    .glass-dark { background: rgba(15,23,42,0.75); backdrop-filter: blur(20px); border: 1px solid rgba(148,163,184,0.15); }
+    .glass-light { background: rgba(255,255,255,0.5); backdrop-filter: blur(12px); border: 1px solid rgba(226,232,240,0.3); }
+    @keyframes float { 0%,100%{transform:translateY(0px)} 50%{transform:translateY(-12px)} }
+    .float { animation: float 6s ease-in-out infinite; }
+    @keyframes slideInUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+    .slide-up { animation: slideInUp 0.6s ease forwards; }
+    .stagger-1 { animation-delay: 0.1s; }
+    .stagger-2 { animation-delay: 0.2s; }
+    .stagger-3 { animation-delay: 0.3s; }
+    .stagger-4 { animation-delay: 0.4s; }
+    body { box-sizing: border-box; }
+  </style>
+ </head>
+ <body class="h-full bg-gradient-to-br from-slate-100 via-blue-50 to-slate-50 text-slate-800 overflow-hidden">
+  <div id="app" class="h-full w-full"></div>
+  <script>
+// ===== MOCK DATA =====
+const MOCK = {
+  users: [
+    { id:1, role:'admin', name:'Md. Rahim Uddin', namebn:'মো. রহিম উদ্দিন', email:'admin@sheltech.com', pass:'admin123', flat:'Office' },
+    { id:2, role:'owner', name:'Kamal Hossain', namebn:'কামাল হোসেন', email:'owner@sheltech.com', pass:'owner123', flat:'4A' },
+    { id:3, role:'tenant', name:'Jamal Ahmed', namebn:'জামাল আহমেদ', email:'tenant@sheltech.com', pass:'tenant123', flat:'6B' },
+    { id:4, role:'staff', name:'Abdul Karim', namebn:'আবদুল করিম', email:'staff@sheltech.com', pass:'staff123', flat:'Guard Post', staffRole:'Security Guard' }
+  ],
+  notices: [
+    { id:1, title:'Water Pump Maintenance', titlebn:'পানির পাম্প রক্ষণাবেক্ষণ', body:'Water supply will be off from 10AM-2PM tomorrow.', bodybn:'আগামীকাল সকাল ১০টা থেকে দুপুর ২টা পর্যন্ত পানি সরবরাহ বন্ধ থাকবে।', date:'2025-01-15', priority:'high' },
+    { id:2, title:'Monthly Meeting', titlebn:'মাসিক সভা', body:'Monthly residents meeting on Jan 20 at community hall.', bodybn:'২০ জানুয়ারি কমিউনিটি হলে মাসিক বাসিন্দা সভা।', date:'2025-01-12', priority:'normal' },
+    { id:3, title:'Eid Celebration', titlebn:'ঈদ উদযাপন', body:'Eid prayer will be held at rooftop. All are welcome.', bodybn:'ছাদে ঈদের নামাজ আদায় করা হবে। সকলকে স্বাগতম।', date:'2025-01-10', priority:'normal' }
+  ],
+  finances: [
+    { id:1, flat:'4A', month:'January 2025', amount:5500, status:'paid', date:'2025-01-05' },
+    { id:2, flat:'4A', month:'December 2024', amount:5500, status:'paid', date:'2024-12-03' },
+    { id:3, flat:'6B', month:'January 2025', amount:4500, status:'pending', date:null },
+    { id:4, flat:'6B', month:'December 2024', amount:4500, status:'overdue', date:null },
+    { id:5, flat:'3C', month:'January 2025', amount:5500, status:'paid', date:'2025-01-08' },
+    { id:6, flat:'5A', month:'January 2025', amount:5000, status:'pending', date:null }
+  ],
+  complaints: [
+    { id:1, flat:'4A', type:'Plumbing', title:'Bathroom leak', titlebn:'বাথরুমে লিক', status:'open', date:'2025-01-14', assignee:null },
+    { id:2, flat:'6B', type:'Electrical', title:'Hallway light broken', titlebn:'হলওয়ের লাইট নষ্ট', status:'in_progress', date:'2025-01-10', assignee:'Electrician Rafiq' },
+    { id:3, flat:'3C', type:'Security', title:'Gate lock damaged', titlebn:'গেটের তালা নষ্ট', status:'resolved', date:'2025-01-05', assignee:'Abdul Karim' }
+  ],
+  visitors: [
+    { id:1, name:'Faruk Mia', phone:'01711234567', flat:'4A', vehicle:'DHA-12-3456', purpose:'Guest', time:'10:30 AM', date:'2025-01-15' },
+    { id:2, name:'Delivery - Foodpanda', phone:'01899876543', flat:'6B', vehicle:'Bike', purpose:'Delivery', time:'1:15 PM', date:'2025-01-15' }
+  ],
+  staff: [
+    { id:1, name:'Abdul Karim', namebn:'আবদুল করিম', role:'Security Guard', rolebn:'নিরাপত্তা প্রহরী', shift:'6AM-6PM', phone:'01712345678', photo:'🛡️' },
+    { id:2, name:'Rafiq Mia', namebn:'রফিক মিয়া', role:'Electrician', rolebn:'ইলেকট্রিশিয়ান', shift:'8AM-5PM', phone:'01898765432', photo:'⚡' },
+    { id:3, name:'Hafiz Maulana Yusuf', namebn:'হাফিজ মাওলানা ইউসুফ', role:'Imam/Huzur', rolebn:'ইমাম/হুজুর', shift:'Fajr-Isha', phone:'01634567890', photo:'🕌' },
+    { id:4, name:'Bilkis Begum', namebn:'বিলকিস বেগম', role:'Cleaner', rolebn:'পরিচ্ছন্নকর্মী', shift:'7AM-3PM', phone:'01556789012', photo:'🧹' }
+  ],
+  flats: [
+    { flat:'1A', owner:'Mr. Shahid', ownerbn:'মি. শহীদ', tenant:null, phone:'01711111111', emergency:'01722222222' },
+    { flat:'2A', owner:'Mrs. Fatema', ownerbn:'মিসেস ফাতেমা', tenant:'Rana Ahmed', phone:'01733333333', emergency:'01744444444' },
+    { flat:'3C', owner:'Mr. Habib', ownerbn:'মি. হাবিব', tenant:null, phone:'01755555555', emergency:'01766666666' },
+    { flat:'4A', owner:'Kamal Hossain', ownerbn:'কামাল হোসেন', tenant:'Sumon Khan', phone:'01777777777', emergency:'01788888888' },
+    { flat:'5A', owner:'Dr. Nasrin', ownerbn:'ডা. নাসরিন', tenant:null, phone:'01799999999', emergency:'01700000000' },
+    { flat:'6B', owner:'Mr. Alam', ownerbn:'মি. আলম', tenant:'Jamal Ahmed', phone:'01611111111', emergency:'01622222222' }
+  ],
+  bookings: [
+    { id:1, facility:'Community Hall', facilitybn:'কমিউনিটি হল', flat:'4A', date:'2025-01-25', time:'6PM-10PM', status:'approved' },
+    { id:2, facility:'Rooftop', facilitybn:'ছাদ', flat:'6B', date:'2025-01-28', time:'5PM-8PM', status:'pending' }
+  ],
+  duties: [
+    { id:1, task:'Morning patrol', taskbn:'সকালের টহল', staff:'Abdul Karim', time:'6:00 AM', done:true },
+    { id:2, task:'Clean 3rd floor corridor', taskbn:'৩য় তলার করিডোর পরিষ্কার', staff:'Bilkis Begum', time:'7:30 AM', done:true },
+    { id:3, task:'Check generator fuel', taskbn:'জেনারেটরের জ্বালানি চেক', staff:'Rafiq Mia', time:'9:00 AM', done:false },
+    { id:4, task:'Evening Azan', taskbn:'সন্ধ্যার আজান', staff:'Hafiz Maulana Yusuf', time:'5:30 PM', done:false },
+    { id:5, task:'Night patrol', taskbn:'রাতের টহল', staff:'Abdul Karim', time:'10:00 PM', done:false }
+  ]
+};
+
+// ===== TRANSLATIONS =====
+const T = {
+  en: {
+    appName:'Sheltech Enclave Tower', login:'Login', email:'Email', password:'Password', role:'Role',
+    admin:'Admin', owner:'Flat Owner', tenant:'Tenant (Varatia)', staff:'Staff',
+    dashboard:'Dashboard', notices:'Notices', finances:'Finances', complaints:'Complaints',
+    visitors:'Visitors', staffMgmt:'Staff', directory:'Directory', bookings:'Bookings', duties:'Duties',
+    logout:'Logout', welcome:'Welcome', totalCollected:'Total Collected', pendingDues:'Pending Dues',
+    openComplaints:'Open Complaints', activeStaff:'Active Staff', recentNotices:'Recent Notices',
+    allNotices:'All Notices', postNotice:'Post Notice', title:'Title', description:'Description',
+    post:'Post', high:'High', normal:'Normal', priority:'Priority',
+    serviceCharge:'Service Charges', month:'Month', amount:'Amount (BDT)', status:'Status',
+    paid:'Paid', pending:'Pending', overdue:'Overdue', flat:'Flat', date:'Date',
+    generateReceipt:'Receipt', complaintSystem:'Complaint System', newComplaint:'New Complaint',
+    type:'Type', plumbing:'Plumbing', electrical:'Electrical', security:'Security', other:'Other',
+    submit:'Submit', open:'Open', inProgress:'In Progress', resolved:'Resolved', assignTo:'Assign To',
+    visitorLog:'Visitor Log', name:'Name', phone:'Phone', vehicle:'Vehicle', purpose:'Purpose',
+    addVisitor:'Add Visitor', time:'Time', staffRoster:'Staff Roster', shift:'Shift',
+    flatDirectory:'Flat Directory', ownerName:'Owner', tenantName:'Tenant', emergency:'Emergency',
+    search:'Search...', facilityBooking:'Facility Booking', facility:'Facility',
+    communityHall:'Community Hall', rooftop:'Rooftop', bbqSpace:'BBQ Space', book:'Book',
+    approved:'Approved', dutyRoster:'Today\'s Duty Roster', task:'Task', markDone:'Mark Done',
+    done:'Done', selectRole:'Select Role', loginHint:'Use any email/password combo',
+    noData:'No data available', cancel:'Cancel'
+  },
+  bn: {
+    appName:'শেলটেক এনক্লেভ টাওয়ার', login:'লগইন', email:'ইমেইল', password:'পাসওয়ার্ড', role:'ভূমিকা',
+    admin:'অ্যাডমিন', owner:'ফ্ল্যাট মালিক', tenant:'ভাড়াটিয়া', staff:'কর্মচারী',
+    dashboard:'ড্যাশবোর্ড', notices:'নোটিশ', finances:'আর্থিক', complaints:'অভিযোগ',
+    visitors:'দর্শনার্থী', staffMgmt:'কর্মচারী', directory:'ডিরেক্টরি', bookings:'বুকিং', duties:'দায়িত্ব',
+    logout:'লগআউট', welcome:'স্বাগতম', totalCollected:'মোট সংগৃহীত', pendingDues:'বকেয়া',
+    openComplaints:'খোলা অভিযোগ', activeStaff:'সক্রিয় কর্মচারী', recentNotices:'সাম্প্রতিক নোটিশ',
+    allNotices:'সকল নোটিশ', postNotice:'নোটিশ পোস্ট', title:'শিরোনাম', description:'বিবরণ',
+    post:'পোস্ট', high:'জরুরি', normal:'সাধারণ', priority:'অগ্রাধিকার',
+    serviceCharge:'সার্ভিস চার্জ', month:'মাস', amount:'পরিমাণ (টাকা)', status:'অবস্থা',
+    paid:'পরিশোধিত', pending:'বকেয়া', overdue:'মেয়াদোত্তীর্ণ', flat:'ফ্ল্যাট', date:'তারিখ',
+    generateReceipt:'রসিদ', complaintSystem:'অভিযোগ ব্যবস্থা', newComplaint:'নতুন অভিযোগ',
+    type:'ধরন', plumbing:'প্লাম্বিং', electrical:'বৈদ্যুতিক', security:'নিরাপত্তা', other:'অন্যান্য',
+    submit:'জমা দিন', open:'খোলা', inProgress:'চলমান', resolved:'সমাধান', assignTo:'নিয়োগ করুন',
+    visitorLog:'দর্শনার্থী লগ', name:'নাম', phone:'ফোন', vehicle:'গাড়ি', purpose:'উদ্দেশ্য',
+    addVisitor:'দর্শনার্থী যোগ', time:'সময়', staffRoster:'কর্মচারী তালিকা', shift:'শিফট',
+    flatDirectory:'ফ্ল্যাট ডিরেক্টরি', ownerName:'মালিক', tenantName:'ভাড়াটিয়া', emergency:'জরুরি',
+    search:'খুঁজুন...', facilityBooking:'সুবিধা বুকিং', facility:'সুবিধা',
+    communityHall:'কমিউনিটি হল', rooftop:'ছাদ', bbqSpace:'বিবিকিউ স্পেস', book:'বুক করুন',
+    approved:'অনুমোদিত', dutyRoster:'আজকের দায়িত্ব', task:'কাজ', markDone:'সম্পন্ন',
+    done:'হয়েছে', selectRole:'ভূমিকা নির্বাচন', loginHint:'যেকোনো ইমেইল/পাসওয়ার্ড ব্যবহার করুন',
+    noData:'কোনো তথ্য নেই', cancel:'বাতিল'
+  }
+};
+
+// ===== APP STATE =====
+let state = {
+  lang: localStorage.getItem('lang') || 'en',
+  user: JSON.parse(localStorage.getItem('user') || 'null'),
+  page: 'dashboard',
+  sidebarOpen: false,
+  view: 'home'
+};
+
+function t(key) { return T[state.lang][key] || key; }
+function setState(updates) { Object.assign(state, updates); render(); }
+
+// ===== RENDER ENGINE =====
+function render() {
+  const app = document.getElementById('app');
+  if (state.view === 'home') { app.innerHTML = renderHome(); }
+  else if (state.view === 'login') { app.innerHTML = renderLogin(); }
+  else { app.innerHTML = renderShell(); }
+  lucide.createIcons();
+  bindEvents();
+}
+
+function renderLogin() {
+  return `
+  <div class="h-full w-full flex items-center justify-center p-4">
+    <div class="w-full max-w-md fade-in">
+      <div class="text-center mb-8">
+        <div class="w-16 h-16 glass rounded-2xl flex items-center justify-center mx-auto mb-4 float">
+          <i data-lucide="building-2" class="w-8 h-8 text-blue-600"></i>
+        </div>
+        <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">${t('appName')}</h1>
+        <p class="text-slate-600 text-sm mt-2">${t('loginHint')}</p>
+      </div>
+      <div class="glass rounded-2xl p-6 shadow-xl">
+        <div class="absolute top-4 right-4 fixed z-50">
+          <button id="langToggleLogin" class="px-3 py-1.5 rounded-full text-xs font-semibold glass hover:shadow-lg transition text-slate-700">${state.lang==='en'?'বাংলা':'English'}</button>
+        </div>
+        <div class="space-y-4">
+          <div><label class="text-xs text-slate-700 mb-1.5 block font-semibold">${t('role')}</label>
+            <select id="loginRole" class="w-full glass-subtle rounded-lg px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+              <option value="admin">👨‍💼 ${t('admin')}</option>
+              <option value="owner">🏠 ${t('owner')}</option>
+              <option value="tenant">👤 ${t('tenant')}</option>
+              <option value="staff">👔 ${t('staff')}</option>
+            </select>
+          </div>
+          <div><label class="text-xs text-slate-700 mb-1.5 block font-semibold">${t('email')}</label>
+            <input id="loginEmail" type="email" class="w-full glass-subtle rounded-lg px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition" placeholder="Try: admin@sheltech.com">
+          </div>
+          <div><label class="text-xs text-slate-700 mb-1.5 block font-semibold">${t('password')}</label>
+            <input id="loginPass" type="password" class="w-full glass-subtle rounded-lg px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition" placeholder="Any password works">
+          </div>
+          <button id="loginBtn" class="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-semibold py-2.5 rounded-lg transition mt-2 shadow-lg hover:shadow-xl">✓ ${t('login')}</button>
+        </div>
+      </div>
+      <div class="mt-4 glass rounded-xl p-3">
+        <p class="text-[10px] text-slate-600 text-center font-semibold">📧 Try these emails:</p>
+        <div class="text-[9px] text-slate-700 text-center mt-1.5 space-y-0.5">
+          <p>admin@sheltech.com</p>
+          <p>owner@sheltech.com</p>
+          <p>tenant@sheltech.com</p>
+          <p>staff@sheltech.com</p>
+        </div>
+      </div>
+      <button id="backToHome" class="w-full mt-3 text-sm text-blue-600 hover:text-blue-700 font-medium transition">← Back to Home</button>
+    </div>
+  </div>`;
+}
+
+function getNavItems() {
+  const role = state.user.role;
+  let items = [{ key:'dashboard', icon:'layout-dashboard', label:t('dashboard') }];
+  items.push({ key:'notices', icon:'megaphone', label:t('notices') });
+  if(role==='admin'||role==='owner'||role==='tenant') items.push({ key:'finances', icon:'wallet', label:t('finances') });
+  if(role==='admin'||role==='owner'||role==='tenant') items.push({ key:'complaints', icon:'message-square-warning', label:t('complaints') });
+  if(role==='admin'||role==='staff') items.push({ key:'visitors', icon:'user-check', label:t('visitors') });
+  if(role==='admin') items.push({ key:'staffMgmt', icon:'users', label:t('staffMgmt') });
+  if(role==='admin'||role==='owner') items.push({ key:'directory', icon:'book-open', label:t('directory') });
+  if(role==='admin'||role==='owner'||role==='tenant') items.push({ key:'bookings', icon:'calendar-check', label:t('bookings') });
+  if(role==='staff') items.push({ key:'duties', icon:'clipboard-check', label:t('duties') });
+  return items;
+}
+
+function renderShell() {
+  const navItems = getNavItems();
+  const activeItem = navItems.find(n=>n.key===state.page) || navItems[0];
+  return `
+  <div class="h-full w-full flex flex-col md:flex-row overflow-hidden">
+    <!-- Mobile Header -->
+    <div class="md:hidden flex items-center justify-between px-4 py-3 glass border-b border-slate-200/50">
+      <button id="menuBtn" class="p-1"><i data-lucide="menu" class="w-5 h-5 text-slate-800"></i></button>
+      <span class="font-bold text-sm text-slate-900">${t('appName')}</span>
+      <button id="langToggleM" class="px-2 py-0.5 rounded-full text-[10px] font-semibold glass text-slate-700">${state.lang==='en'?'বাং':'EN'}</button>
+    </div>
+    <!-- Sidebar -->
+    <aside id="sidebar" class="${state.sidebarOpen?'translate-x-0':'-translate-x-full'} md:translate-x-0 fixed md:static inset-y-0 left-0 z-40 w-64 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border-r border-slate-700/30 flex flex-col transition-transform duration-200 shadow-2xl">
+      <div class="p-5 border-b border-slate-700/30 flex items-center gap-3">
+        <div class="w-9 h-9 glass rounded-xl flex items-center justify-center"><i data-lucide="building-2" class="w-5 h-5 text-blue-400"></i></div>
+        <div><p class="font-bold text-sm text-white">${t('appName')}</p><p class="text-[10px] text-slate-400">${state.user.role.toUpperCase()}</p></div>
+      </div>
+      <nav class="flex-1 py-3 overflow-y-auto">
+        ${navItems.map(n=>`<a href="#" data-nav="${n.key}" class="sidebar-link flex items-center gap-3 px-5 py-2.5 text-sm text-slate-300 hover:text-blue-200 hover:bg-slate-700/50 transition ${state.page===n.key?'active border-l-blue-400 bg-slate-700/40 text-blue-200':'border-l-transparent'} border-l-2"><i data-lucide="${n.icon}" class="w-4 h-4"></i>${n.label}</a>`).join('')}
+      </nav>
+      <div class="p-4 border-t border-slate-700/30">
+        <div class="flex items-center gap-2 mb-3">
+          <div class="w-8 h-8 glass rounded-full flex items-center justify-center text-xs font-bold text-blue-300 bg-blue-900/40">${state.user.name.charAt(0)}</div>
+          <div><p class="text-xs font-medium text-slate-100">${state.lang==='en'?state.user.name:state.user.namebn||state.user.name}</p><p class="text-[10px] text-slate-500">${state.user.flat}</p></div>
+        </div>
+        <button id="logoutBtn" class="w-full flex items-center gap-2 px-3 py-2 text-xs text-red-300 hover:bg-red-500/20 rounded-lg transition"><i data-lucide="log-out" class="w-3.5 h-3.5"></i>${t('logout')}</button>
+      </div>
+    </aside>
+    ${state.sidebarOpen?'<div id="overlay" class="fixed inset-0 bg-slate-900/30 z-30 md:hidden backdrop-blur-sm"></div>':''}
+    <!-- Main -->
+    <main class="flex-1 overflow-y-auto bg-gradient-to-br from-slate-50 via-blue-25 to-slate-75">
+      <header class="hidden md:flex items-center justify-between px-6 py-4 border-b glass border-slate-200/50 bg-white/60 backdrop-blur-sm">
+        <h2 class="font-bold text-lg text-slate-900">${activeItem.label}</h2>
+        <div class="flex items-center gap-3">
+          <button id="langToggle" class="px-3 py-1.5 rounded-full text-xs font-semibold glass text-slate-700 hover:shadow-lg transition">${state.lang==='en'?'বাংলা':'English'}</button>
+        </div>
+      </header>
+      <div class="p-4 md:p-6 fade-in">${renderPage()}</div>
+    </main>
+  </div>`;
+}
+
+function renderPage() {
+  switch(state.page) {
+    case 'dashboard': return renderDashboard();
+    case 'notices': return renderNotices();
+    case 'finances': return renderFinances();
+    case 'complaints': return renderComplaints();
+    case 'visitors': return renderVisitors();
+    case 'staffMgmt': return renderStaffMgmt();
+    case 'directory': return renderDirectory();
+    case 'bookings': return renderBookings();
+    case 'duties': return renderDuties();
+    default: return renderDashboard();
+  }
+}
+
+// ===== HOME PAGE =====
+function renderHome() {
+  return `
+  <div class="h-full w-full overflow-y-auto bg-gradient-to-b from-slate-50 via-white to-blue-50">
+    <!-- Navigation -->
+    <nav class="glass border-b border-slate-200/50 sticky top-0 z-40">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 glass rounded-xl flex items-center justify-center"><i data-lucide="building-2" class="w-6 h-6 text-blue-600"></i></div>
+          <span class="font-bold text-xl text-slate-900">${t('appName')}</span>
+        </div>
+        <button id="langToggleHome" class="px-4 py-2 rounded-lg glass text-slate-700 hover:shadow-lg transition font-semibold text-sm">${state.lang==='en'?'🇧🇩 বাংলা':'🇬🇧 English'}</button>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="py-16 md:py-24 px-4">
+      <div class="max-w-4xl mx-auto text-center slide-up stagger-1">
+        <h1 class="text-5xl md:text-6xl font-bold text-slate-900 mb-6">
+          ${state.lang==='en'?'Sheltech Enclave Tower Management System':'শেলটেক এনক্লেভ টাওয়ার ম্যানেজমেন্ট সিস্টেম'}
+        </h1>
+        <p class="text-xl text-slate-700 mb-8 leading-relaxed">
+          ${state.lang==='en'?'Professional integrated platform for comprehensive residential community management. Streamline finances, maintenance, communication, and operations.':'বাসিন্দা সম্প্রদায়ের ব্যাপক পরিচালনার জন্য পেশাদার একীভূত প্ল্যাটফর্ম। আর্থিক, রক্ষণাবেক্ষণ, যোগাযোগ এবং কার্যক্রম সুবিন্যস্ত করুন।'}
+        </p>
+        <button id="goToLogin" class="px-8 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition text-lg">
+          ${state.lang==='en'?'✓ Access Portal':'✓ পোর্টাল অ্যাক্সেস করুন'}
+        </button>
+      </div>
+    </section>
+
+    <!-- Features Grid -->
+    <section class="py-16 px-4">
+      <div class="max-w-6xl mx-auto">
+        <h2 class="text-3xl font-bold text-center text-slate-900 mb-12 slide-up stagger-2">
+          ${state.lang==='en'?'Core Management Modules':'মূল ব্যবস্থাপনা মডিউল'}
+        </h2>
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="glass rounded-xl p-6 hover:shadow-xl transition slide-up stagger-1">
+            <div class="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center text-2xl mb-4">💰</div>
+            <h3 class="font-bold text-slate-900 mb-2">${state.lang==='en'?'Financial Management':'আর্থিক ব্যবস্থাপনা'}</h3>
+            <p class="text-sm text-slate-700">${state.lang==='en'?'Automated billing, payment tracking, and financial reporting':'স্বয়ংক্রিয় বিলিং, পেমেন্ট ট্র্যাকিং এবং আর্থিক রিপোর্টিং'}</p>
+          </div>
+          <div class="glass rounded-xl p-6 hover:shadow-xl transition slide-up stagger-2">
+            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-2xl mb-4">📢</div>
+            <h3 class="font-bold text-slate-900 mb-2">${state.lang==='en'?'Communication Hub':'যোগাযোগ কেন্দ্র'}</h3>
+            <p class="text-sm text-slate-700">${state.lang==='en'?'Priority notices, announcements, and community updates':'অগ্রাধিকার নোটিশ, ঘোষণা এবং সম্প্রদায় আপডেট'}</p>
+          </div>
+          <div class="glass rounded-xl p-6 hover:shadow-xl transition slide-up stagger-3">
+            <div class="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center text-2xl mb-4">🔧</div>
+            <h3 class="font-bold text-slate-900 mb-2">${state.lang==='en'?'Maintenance & Support':'রক্ষণাবেক্ষণ এবং সহায়তা'}</h3>
+            <p class="text-sm text-slate-700">${state.lang==='en'?'Complaint ticketing, assignment, and resolution tracking':'অভিযোগ টিকিটিং, নিয়োগ এবং সমাধান ট্র্যাকিং'}</p>
+          </div>
+          <div class="glass rounded-xl p-6 hover:shadow-xl transition slide-up stagger-4">
+            <div class="w-12 h-12 bg-rose-100 rounded-lg flex items-center justify-center text-2xl mb-4">📋</div>
+            <h3 class="font-bold text-slate-900 mb-2">${state.lang==='en'?'Operations & Security':'অপারেশন এবং নিরাপত্তা'}</h3>
+            <p class="text-sm text-slate-700">${state.lang==='en'?'Visitor management, staff roster, and facility bookings':'দর্শনার্থী ব্যবস্থাপনা, কর্মী তালিকা এবং সুবিধা বুকিং'}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Roles Section -->
+    <section class="py-16 px-4 bg-gradient-to-r from-blue-50 to-cyan-50">
+      <div class="max-w-6xl mx-auto">
+        <h2 class="text-3xl font-bold text-center text-slate-900 mb-12">
+          ${state.lang==='en'?'Role-Based Access':'ভূমিকা-ভিত্তিক অ্যাক্সেস'}
+        </h2>
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="glass rounded-xl p-6 border-2 border-blue-200 hover:shadow-xl transition">
+            <div class="text-4xl mb-3">👨‍💼</div>
+            <h3 class="font-bold text-slate-900 mb-2">${state.lang==='en'?'Admin':'অ্যাডমিন'}</h3>
+            <div class="text-xs text-slate-600 space-y-1">
+              <div>✓ ${state.lang==='en'?'Full system access':'সম্পূর্ণ সিস্টেম অ্যাক্সেস'}</div>
+              <div>✓ ${state.lang==='en'?'User management':'ব্যবহারকারী ব্যবস্থাপনা'}</div>
+              <div>✓ ${state.lang==='en'?'Financial reports':'আর্থিক রিপোর্ট'}</div>
+            </div>
+          </div>
+          <div class="glass rounded-xl p-6 border-2 border-emerald-200 hover:shadow-xl transition">
+            <div class="text-4xl mb-3">🏠</div>
+            <h3 class="font-bold text-slate-900 mb-2">${state.lang==='en'?'Flat Owner':'ফ্ল্যাট মালিক'}</h3>
+            <div class="text-xs text-slate-600 space-y-1">
+              <div>✓ ${state.lang==='en'?'View dues & receipts':'ডিউ এবং রসিদ দেখুন'}</div>
+              <div>✓ ${state.lang==='en'?'Submit complaints':'অভিযোগ জমা দিন'}</div>
+              <div>✓ ${state.lang==='en'?'Book facilities':'সুবিধা বুক করুন'}</div>
+            </div>
+          </div>
+          <div class="glass rounded-xl p-6 border-2 border-amber-200 hover:shadow-xl transition">
+            <div class="text-4xl mb-3">👤</div>
+            <h3 class="font-bold text-slate-900 mb-2">${state.lang==='en'?'Tenant (Varatia)':'ভাড়াটিয়া'}</h3>
+            <div class="text-xs text-slate-600 space-y-1">
+              <div>✓ ${state.lang==='en'?'Pay rent & charges':'ভাড়া এবং চার্জ পরিশোধ করুন'}</div>
+              <div>✓ ${state.lang==='en'?'Raise complaints':'অভিযোগ রেইজ করুন'}</div>
+              <div>✓ ${state.lang==='en'?'View notices':'নোটিশ দেখুন'}</div>
+            </div>
+          </div>
+          <div class="glass rounded-xl p-6 border-2 border-rose-200 hover:shadow-xl transition">
+            <div class="text-4xl mb-3">👔</div>
+            <h3 class="font-bold text-slate-900 mb-2">${state.lang==='en'?'Staff':'কর্মচারী'}</h3>
+            <div class="text-xs text-slate-600 space-y-1">
+              <div>✓ ${state.lang==='en'?'View daily duties':'দৈনিক দায়িত্ব দেখুন'}</div>
+              <div>✓ ${state.lang==='en'?'Mark tasks done':'কাজ সম্পন্ন চিহ্নিত করুন'}</div>
+              <div>✓ ${state.lang==='en'?'Log visitors':'দর্শনার্থী লগ করুন'}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Payment Methods -->
+    <section class="py-16 px-4">
+      <div class="max-w-6xl mx-auto">
+        <h2 class="text-3xl font-bold text-center text-slate-900 mb-12">
+          ${state.lang==='en'?'Flexible Payment Options':'নমনীয় পেমেন্ট অপশন'}
+        </h2>
+        <div class="grid md:grid-cols-3 gap-4">
+          <div class="glass rounded-xl p-6 hover:shadow-xl transition text-center">
+            <div class="text-5xl mb-3">📱</div>
+            <h3 class="font-bold text-slate-900 mb-1">${state.lang==='en'?'Mobile Money':'মোবাইল মানি'}</h3>
+            <p class="text-sm text-slate-600">bKash • Nagad • Rocket</p>
+          </div>
+          <div class="glass rounded-xl p-6 hover:shadow-xl transition text-center">
+            <div class="text-5xl mb-3">🏦</div>
+            <h3 class="font-bold text-slate-900 mb-1">${state.lang==='en'?'Bank Transfer':'ব্যাংক ট্রান্সফার'}</h3>
+            <p class="text-sm text-slate-600">${state.lang==='en'?'Direct deposit from any bank':'যেকোনো ব্যাংক থেকে সরাসরি'}</p>
+          </div>
+          <div class="glass rounded-xl p-6 hover:shadow-xl transition text-center">
+            <div class="text-5xl mb-3">💵</div>
+            <h3 class="font-bold text-slate-900 mb-1">${state.lang==='en'?'Cash & Cheque':'নগদ এবং চেক'}</h3>
+            <p class="text-sm text-slate-600">${state.lang==='en'?'Traditional payment methods':'ঐতিহ্যবাহী পেমেন্ট পদ্ধতি'}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 px-4 bg-gradient-to-r from-blue-600 to-cyan-600">
+      <div class="max-w-2xl mx-auto text-center text-white">
+        <h2 class="text-4xl font-bold mb-6">${state.lang==='en'?'Comprehensive Building Management':'সম্পূর্ণ বিল্ডিং ব্যবস্থাপনা'}</h2>
+        <p class="text-lg mb-8 text-blue-100">${state.lang==='en'?'Streamline operations with our integrated system designed for modern residential communities':'আমাদের সমন্বিত সিস্টেমের সাথে আধুনিক আবাসিক সম্প্রদায়ের জন্য পরিচালনা সুবিন্যস্ত করুন'}</p>
+        <button id="ctaLogin" class="px-8 py-3 bg-white text-blue-600 hover:bg-blue-50 font-bold rounded-lg shadow-xl hover:shadow-2xl transition text-lg">
+          ${state.lang==='en'?'✓ Access Portal Now':'✓ এখনই পোর্টাল অ্যাক্সেস করুন'}
+        </button>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-8 px-4 border-t border-slate-200/50 glass">
+      <div class="max-w-6xl mx-auto text-center">
+        <p class="text-slate-600 text-sm">
+          ${state.lang==='en'?'© 2025 Sheltech Enclave Tower. All rights reserved.':'© 2025 শেলটেক এনক্লেভ টাওয়ার। সর্বস্বত্ব সংরক্ষিত।'}
+        </p>
+      </div>
+    </footer>
+  </div>`;
+}
+
+// ===== PAGES =====
+function renderDashboard() {
+  const collected = MOCK.finances.filter(f=>f.status==='paid').reduce((s,f)=>s+f.amount,0);
+  const pending = MOCK.finances.filter(f=>f.status!=='paid').reduce((s,f)=>s+f.amount,0);
+  const openC = MOCK.complaints.filter(c=>c.status!=='resolved').length;
+  const widgets = [
+    { icon:'banknote', label:t('totalCollected'), value:`৳${collected.toLocaleString()}`, color:'text-emerald-600', bg:'bg-emerald-50' },
+    { icon:'alert-triangle', label:t('pendingDues'), value:`৳${pending.toLocaleString()}`, color:'text-amber-600', bg:'bg-amber-50' },
+    { icon:'message-square-warning', label:t('openComplaints'), value:openC, color:'text-rose-600', bg:'bg-rose-50' },
+    { icon:'shield-check', label:t('activeStaff'), value:MOCK.staff.length, color:'text-blue-600', bg:'bg-blue-50' }
+  ];
+  return `
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
+    ${widgets.map(w=>`<div class="glass rounded-xl p-4 hover:shadow-xl transition">
+      <div class="w-8 h-8 ${w.bg} rounded-lg flex items-center justify-center mb-3"><i data-lucide="${w.icon}" class="w-4 h-4 ${w.color}"></i></div>
+      <p class="text-xl font-bold text-slate-900">${w.value}</p>
+      <p class="text-[11px] text-slate-600 mt-0.5">${w.label}</p>
+    </div>`).join('')}
+  </div>
+  <div class="grid md:grid-cols-2 gap-4">
+    <div class="glass rounded-xl p-5 hover:shadow-xl transition">
+      <h3 class="font-semibold text-sm text-slate-900 mb-3 flex items-center gap-2"><i data-lucide="megaphone" class="w-4 h-4 text-blue-600"></i>${t('recentNotices')}</h3>
+      <div class="space-y-2">
+        ${MOCK.notices.slice(0,3).map(n=>`<div class="p-3 glass-subtle rounded-lg">
+          <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full ${n.priority==='high'?'bg-rose-500':'bg-slate-400'}"></span><span class="text-xs font-medium text-slate-800">${state.lang==='en'?n.title:n.titlebn}</span></div>
+          <p class="text-[10px] text-slate-600 mt-1">${n.date}</p>
+        </div>`).join('')}
+      </div>
+    </div>
+    <div class="glass rounded-xl p-5 hover:shadow-xl transition">
+      <h3 class="font-semibold text-sm text-slate-900 mb-3 flex items-center gap-2"><i data-lucide="clipboard-check" class="w-4 h-4 text-blue-600"></i>${t('openComplaints')}</h3>
+      <div class="space-y-2">
+        ${MOCK.complaints.filter(c=>c.status!=='resolved').map(c=>`<div class="p-3 glass-subtle rounded-lg flex items-center justify-between">
+          <div><p class="text-xs font-medium text-slate-900">${state.lang==='en'?c.title:c.titlebn}</p><p class="text-[10px] text-slate-600">${t('flat')} ${c.flat} • ${c.type}</p></div>
+          <span class="text-[10px] px-2 py-0.5 rounded-full ${c.status==='open'?'bg-amber-100 text-amber-700':'bg-blue-100 text-blue-700'}">${c.status==='open'?t('open'):t('inProgress')}</span>
+        </div>`).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderNotices() {
+  const isAdmin = state.user.role==='admin';
+  return `
+  ${isAdmin?`<div class="glass rounded-xl p-5 mb-4 hover:shadow-xl transition">
+    <h3 class="font-semibold text-sm text-slate-900 mb-3">${t('postNotice')}</h3>
+    <div class="space-y-3">
+      <input id="noticeTitle" class="w-full glass-subtle rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition" placeholder="${t('title')}">
+      <textarea id="noticeBody" class="w-full glass-subtle rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition h-20 resize-none" placeholder="${t('description')}"></textarea>
+      <div class="flex gap-2">
+        <select id="noticePriority" class="glass-subtle rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"><option value="normal">${t('normal')}</option><option value="high">${t('high')}</option></select>
+        <button id="postNoticeBtn" class="px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-sm rounded-lg hover:shadow-lg transition font-semibold">✓ ${t('post')}</button>
+      </div>
+    </div>
+  </div>`:''}
+  <div class="space-y-3">
+    ${MOCK.notices.map(n=>`<div class="glass rounded-xl p-4 hover:shadow-xl transition border-l-4 ${n.priority==='high'?'border-l-rose-500':'border-l-slate-300'}">
+      <div class="flex items-start justify-between">
+        <div><h4 class="font-semibold text-sm text-slate-900">${state.lang==='en'?n.title:n.titlebn}</h4><p class="text-xs text-slate-600 mt-1">${state.lang==='en'?n.body:n.bodybn}</p></div>
+        ${n.priority==='high'?`<span class="text-[10px] px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 font-medium shrink-0">${t('high')}</span>`:''}
+      </div>
+      <p class="text-[10px] text-slate-600 mt-2">${n.date}</p>
+    </div>`).join('')}
+  </div>`;
+}
+
+function renderFinances() {
+  const userFlat = state.user.flat;
+  const data = state.user.role==='admin' ? MOCK.finances : MOCK.finances.filter(f=>f.flat===userFlat);
+  const statusColors = { paid:'bg-emerald-100 text-emerald-700', pending:'bg-amber-100 text-amber-700', overdue:'bg-rose-100 text-rose-700' };
+  return `
+  <div class="glass rounded-xl border border-slate-200/50 overflow-hidden hover:shadow-xl transition mb-6">
+    <div class="overflow-x-auto">
+      <table class="w-full text-xs">
+        <thead><tr class="border-b border-slate-200 text-slate-700 bg-slate-50">
+          <th class="text-left px-4 py-3 font-semibold">${t('flat')}</th><th class="text-left px-4 py-3 font-semibold">${t('month')}</th>
+          <th class="text-left px-4 py-3 font-semibold">${t('amount')}</th><th class="text-left px-4 py-3 font-semibold">${t('status')}</th>
+          <th class="text-left px-4 py-3 font-semibold">${t('date')}</th>
+        </tr></thead>
+        <tbody>
+          ${data.map(f=>`<tr class="border-b border-slate-100 hover:bg-slate-50/50">
+            <td class="px-4 py-3 font-medium text-slate-900">${f.flat}</td><td class="px-4 py-3 text-slate-700">${f.month}</td>
+            <td class="px-4 py-3 text-slate-700">৳${f.amount.toLocaleString()}</td>
+            <td class="px-4 py-3"><span class="text-[10px] px-2 py-0.5 rounded-full font-medium ${statusColors[f.status]}">${t(f.status)}</span></td>
+            <td class="px-4 py-3 text-slate-700">${f.date||'-'}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="grid md:grid-cols-3 gap-4">
+    <div class="glass rounded-xl p-5 hover:shadow-xl transition text-center">
+      <div class="text-4xl mb-2">💳</div>
+      <h4 class="font-bold text-slate-900 mb-2">${state.lang==='en'?'Payment Methods':'পেমেন্ট পদ্ধতি'}</h4>
+      <div class="text-xs text-slate-600 space-y-1">
+        <p>📱 bKash • Nagad • Rocket</p>
+        <p>🏦 Bank Transfer</p>
+        <p>💵 Cash • Cheque</p>
+      </div>
+    </div>
+    <div class="glass rounded-xl p-5 hover:shadow-xl transition text-center">
+      <div class="text-4xl mb-2">📋</div>
+      <h4 class="font-bold text-slate-900 mb-2">${state.lang==='en'?'Quick Actions':'দ্রুত পদক্ষেপ'}</h4>
+      <button class="text-xs px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition font-medium">→ ${state.lang==='en'?'View Receipts':'রসিদ দেখুন'}</button>
+    </div>
+    <div class="glass rounded-xl p-5 hover:shadow-xl transition text-center">
+      <div class="text-4xl mb-2">🔔</div>
+      <h4 class="font-bold text-slate-900 mb-2">${state.lang==='en'?'Payment Info':'পেমেন্ট তথ্য'}</h4>
+      <p class="text-[10px] text-slate-600">${state.lang==='en'?'Pay by 5th of each month':'প্রতি মাসের ৫ তারিখের মধ্যে পরিশোধ করুন'}</p>
+    </div>
+  </div>`;
+}
+
+function renderComplaints() {
+  const isAdmin = state.user.role==='admin';
+  const userFlat = state.user.flat;
+  const data = isAdmin ? MOCK.complaints : MOCK.complaints.filter(c=>c.flat===userFlat);
+  const statusColors = { open:'bg-amber-100 text-amber-700', in_progress:'bg-blue-100 text-blue-700', resolved:'bg-emerald-100 text-emerald-700' };
+  return `
+  <div class="glass rounded-xl p-5 mb-4 hover:shadow-lg transition">
+    <h3 class="font-semibold text-sm text-slate-900 mb-3">${t('newComplaint')}</h3>
+    <div class="flex flex-wrap gap-2">
+      <select id="complaintType" class="glass-subtle rounded-lg px-3 py-2 text-sm text-slate-800 flex-1 min-w-[120px] focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <option value="Plumbing">${t('plumbing')}</option><option value="Electrical">${t('electrical')}</option>
+        <option value="Security">${t('security')}</option><option value="Other">${t('other')}</option>
+      </select>
+      <input id="complaintTitle" class="glass-subtle rounded-lg px-3 py-2 text-sm text-slate-800 flex-[2] min-w-[200px] focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="${t('title')}">
+      <button id="submitComplaint" class="px-4 py-2 bg-gradient-to-r from-indigo-600 to-emerald-600 text-white text-sm rounded-lg hover:shadow-lg transition">${t('submit')}</button>
+    </div>
+  </div>
+  <div class="space-y-3">
+    ${data.map(c=>`<div class="glass rounded-xl p-4 hover:shadow-lg transition border-l-4 ${c.status==='open'?'border-l-amber-500':c.status==='in_progress'?'border-l-blue-500':'border-l-emerald-500'}">
+      <div class="flex items-start justify-between gap-2">
+        <div><h4 class="font-semibold text-sm text-slate-900">${state.lang==='en'?c.title:c.titlebn}</h4>
+          <p class="text-[10px] text-slate-600 mt-0.5">${t('flat')} ${c.flat} • ${c.type} • ${c.date}</p>
+          ${c.assignee?`<p class="text-[10px] text-indigo-600 mt-1 font-medium">→ ${c.assignee}</p>`:''}
+        </div>
+        <span class="text-[10px] px-2 py-0.5 rounded-full shrink-0 font-medium ${statusColors[c.status]}">${c.status==='open'?t('open'):c.status==='in_progress'?t('inProgress'):t('resolved')}</span>
+      </div>
+      ${isAdmin && c.status!=='resolved'?`<div class="mt-2 flex gap-2"><select class="assign-select glass-subtle rounded px-2 py-1 text-[10px] text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500" data-id="${c.id}">
+        <option>${t('assignTo')}...</option>${MOCK.staff.map(s=>`<option>${s.name}</option>`).join('')}
+      </select></div>`:''}
+    </div>`).join('')}
+  </div>`;
+}
+
+function renderVisitors() {
+  return `
+  <div class="glass rounded-xl p-5 mb-4 hover:shadow-lg transition">
+    <h3 class="font-semibold text-sm text-slate-900 mb-3">${t('addVisitor')}</h3>
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-2">
+      <input id="vName" class="glass-subtle rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="${t('name')}">
+      <input id="vPhone" class="glass-subtle rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="${t('phone')}">
+      <input id="vFlat" class="glass-subtle rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="${t('flat')}">
+      <input id="vVehicle" class="glass-subtle rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="${t('vehicle')}">
+      <button id="addVisitorBtn" class="px-4 py-2 bg-gradient-to-r from-indigo-600 to-emerald-600 text-white text-sm rounded-lg hover:shadow-lg transition">${t('addVisitor')}</button>
+    </div>
+  </div>
+  <div class="glass rounded-xl border overflow-hidden hover:shadow-lg transition">
+    <div class="overflow-x-auto">
+      <table class="w-full text-xs">
+        <thead><tr class="border-b border-slate-200 text-slate-700 bg-slate-100/50">
+          <th class="text-left px-4 py-3 font-semibold">${t('name')}</th><th class="text-left px-4 py-3 font-semibold">${t('phone')}</th>
+          <th class="text-left px-4 py-3 font-semibold">${t('flat')}</th><th class="text-left px-4 py-3 font-semibold">${t('vehicle')}</th>
+          <th class="text-left px-4 py-3 font-semibold">${t('time')}</th>
+        </tr></thead>
+        <tbody>${MOCK.visitors.map(v=>`<tr class="border-b border-slate-100 hover:bg-slate-100/30">
+          <td class="px-4 py-3 font-medium text-slate-900">${v.name}</td><td class="px-4 py-3 text-slate-700">${v.phone}</td>
+          <td class="px-4 py-3 text-slate-700">${v.flat}</td><td class="px-4 py-3 text-slate-700">${v.vehicle}</td>
+          <td class="px-4 py-3 text-slate-700">${v.time}</td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function renderStaffMgmt() {
+  return `<div class="grid md:grid-cols-2 gap-4">
+    ${MOCK.staff.map(s=>`<div class="glass rounded-xl p-5 hover:shadow-lg transition flex items-start gap-4">
+      <div class="w-12 h-12 bg-gradient-to-br from-indigo-100 to-emerald-100 rounded-xl flex items-center justify-center text-2xl shrink-0">${s.photo}</div>
+      <div class="flex-1">
+        <h4 class="font-semibold text-sm text-slate-900">${state.lang==='en'?s.name:s.namebn}</h4>
+        <p class="text-[11px] text-indigo-600 font-medium">${state.lang==='en'?s.role:s.rolebn}</p>
+        <div class="mt-2 space-y-0.5 text-[10px] text-slate-600">
+          <p><i data-lucide="clock" class="w-3 h-3 inline mr-1"></i>${s.shift}</p>
+          <p><i data-lucide="phone" class="w-3 h-3 inline mr-1"></i>${s.phone}</p>
+        </div>
+      </div>
+    </div>`).join('')}
+  </div>`;
+}
+
+function renderDirectory() {
+  return `
+  <div class="mb-4"><input id="dirSearch" class="w-full md:w-64 glass rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="${t('search')}"></div>
+  <div class="glass rounded-xl border overflow-hidden hover:shadow-lg transition">
+    <div class="overflow-x-auto">
+      <table class="w-full text-xs">
+        <thead><tr class="border-b border-slate-200 text-slate-700 bg-slate-100/50">
+          <th class="text-left px-4 py-3 font-semibold">${t('flat')}</th><th class="text-left px-4 py-3 font-semibold">${t('ownerName')}</th>
+          <th class="text-left px-4 py-3 font-semibold">${t('tenantName')}</th><th class="text-left px-4 py-3 font-semibold">${t('phone')}</th>
+          <th class="text-left px-4 py-3 font-semibold">${t('emergency')}</th>
+        </tr></thead>
+        <tbody id="dirBody">${MOCK.flats.map(f=>`<tr class="border-b border-slate-100 hover:bg-slate-100/30 dir-row">
+          <td class="px-4 py-3 font-medium text-slate-900">${f.flat}</td>
+          <td class="px-4 py-3 text-slate-700">${state.lang==='en'?f.owner:f.ownerbn}</td>
+          <td class="px-4 py-3 text-slate-700">${f.tenant||'-'}</td>
+          <td class="px-4 py-3 text-slate-700">${f.phone}</td>
+          <td class="px-4 py-3 text-slate-700">${f.emergency}</td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function renderBookings() {
+  const statusColors = { approved:'bg-emerald-100 text-emerald-700', pending:'bg-amber-100 text-amber-700' };
+  return `
+  <div class="glass rounded-xl p-5 mb-4 hover:shadow-lg transition">
+    <h3 class="font-semibold text-sm text-slate-900 mb-3">${t('facilityBooking')}</h3>
+    <div class="flex flex-wrap gap-2">
+      <select id="bookFacility" class="glass-subtle rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <option>${t('communityHall')}</option><option>${t('rooftop')}</option><option>${t('bbqSpace')}</option>
+      </select>
+      <input id="bookDate" type="date" class="glass-subtle rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+      <button id="bookBtn" class="px-4 py-2 bg-gradient-to-r from-indigo-600 to-emerald-600 text-white text-sm rounded-lg hover:shadow-lg transition">${t('book')}</button>
+    </div>
+  </div>
+  <div class="space-y-3">
+    ${MOCK.bookings.map(b=>`<div class="glass rounded-xl p-4 hover:shadow-lg transition flex items-center justify-between">
+      <div><h4 class="font-semibold text-sm text-slate-900">${state.lang==='en'?b.facility:b.facilitybn}</h4>
+        <p class="text-[10px] text-slate-600">${t('flat')} ${b.flat} • ${b.date} • ${b.time}</p></div>
+      <span class="text-[10px] px-2 py-0.5 rounded-full font-medium ${statusColors[b.status]}">${b.status==='approved'?t('approved'):t('pending')}</span>
+    </div>`).join('')}
+  </div>`;
+}
+
+function renderDuties() {
+  const myDuties = MOCK.duties.filter(d=>d.staff===state.user.name||state.user.role==='admin');
+  return `<div class="space-y-3">
+    ${myDuties.map(d=>`<div class="glass rounded-xl p-4 hover:shadow-lg transition flex items-center gap-3">
+      <button class="duty-toggle w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition ${d.done?'border-emerald-500 bg-emerald-100':'border-slate-300 hover:border-emerald-400'}" data-id="${d.id}">
+        ${d.done?'<i data-lucide="check" class="w-3 h-3 text-emerald-600"></i>':''}
+      </button>
+      <div class="flex-1">
+        <p class="text-sm font-medium text-slate-900 ${d.done?'line-through text-slate-500':''}">${state.lang==='en'?d.task:d.taskbn}</p>
+        <p class="text-[10px] text-slate-600">${d.staff} • ${d.time}</p>
+      </div>
+    </div>`).join('')}
+  </div>`;
+}
+
+// ===== EVENT BINDING =====
+function bindEvents() {
+  document.getElementById('goToLogin')?.addEventListener('click', e=>{ e.preventDefault(); setState({view:'login'}); });
+  document.getElementById('ctaLogin')?.addEventListener('click', e=>{ e.preventDefault(); setState({view:'login'}); });
+  document.getElementById('backToHome')?.addEventListener('click', e=>{ e.preventDefault(); setState({view:'home'}); });
+
+  document.getElementById('loginBtn')?.addEventListener('click', e=>{
+    e.preventDefault();
+    const role = document.getElementById('loginRole').value;
+    const user = MOCK.users.find(u=>u.role===role);
+    if(user){ localStorage.setItem('user',JSON.stringify(user)); setState({user, page:'dashboard', view:'app'}); }
+  });
+  document.getElementById('logoutBtn')?.addEventListener('click', e=>{ e.preventDefault(); localStorage.removeItem('user'); setState({user:null, page:'dashboard', sidebarOpen:false, view:'home'}); });
+  document.getElementById('menuBtn')?.addEventListener('click', ()=>setState({sidebarOpen:!state.sidebarOpen}));
+  document.getElementById('overlay')?.addEventListener('click', ()=>setState({sidebarOpen:false}));
+  document.querySelectorAll('[data-nav]').forEach(el=>el.addEventListener('click', e=>{ e.preventDefault(); setState({page:e.currentTarget.dataset.nav,sidebarOpen:false}); }));
+
+  const langBtns = ['langToggle','langToggleM','langToggleLogin','langToggleHome'];
+  langBtns.forEach(id=>{ document.getElementById(id)?.addEventListener('click', ()=>{ const nl=state.lang==='en'?'bn':'en'; localStorage.setItem('lang',nl); setState({lang:nl}); }); });
+
+  document.getElementById('postNoticeBtn')?.addEventListener('click', e=>{
+    e.preventDefault();
+    const title=document.getElementById('noticeTitle').value;
+    const body=document.getElementById('noticeBody').value;
+    const priority=document.getElementById('noticePriority').value;
+    if(title){ MOCK.notices.unshift({id:Date.now(),title,titlebn:title,body,bodybn:body,date:new Date().toISOString().split('T')[0],priority}); document.getElementById('noticeTitle').value=''; document.getElementById('noticeBody').value=''; render(); }
+  });
+
+  document.getElementById('submitComplaint')?.addEventListener('click', e=>{
+    e.preventDefault();
+    const type=document.getElementById('complaintType').value;
+    const title=document.getElementById('complaintTitle').value;
+    if(title){ MOCK.complaints.unshift({id:Date.now(),flat:state.user.flat,type,title,titlebn:title,status:'open',date:new Date().toISOString().split('T')[0],assignee:null}); document.getElementById('complaintTitle').value=''; render(); }
+  });
+
+  document.getElementById('addVisitorBtn')?.addEventListener('click', e=>{
+    e.preventDefault();
+    const name=document.getElementById('vName').value;
+    const phone=document.getElementById('vPhone').value;
+    const flat=document.getElementById('vFlat').value;
+    const vehicle=document.getElementById('vVehicle').value;
+    if(name){ MOCK.visitors.unshift({id:Date.now(),name,phone,flat,vehicle,purpose:'Guest',time:new Date().toLocaleTimeString('en',{hour:'numeric',minute:'2-digit'}),date:new Date().toISOString().split('T')[0]}); document.getElementById('vName').value=''; document.getElementById('vPhone').value=''; document.getElementById('vFlat').value=''; document.getElementById('vVehicle').value=''; render(); }
+  });
+
+  document.getElementById('bookBtn')?.addEventListener('click', e=>{
+    e.preventDefault();
+    const facility=document.getElementById('bookFacility').value;
+    const date=document.getElementById('bookDate').value;
+    if(date){ MOCK.bookings.unshift({id:Date.now(),facility,facilitybn:facility,flat:state.user.flat,date,time:'TBD',status:'pending'}); document.getElementById('bookDate').value=''; render(); }
+  });
+
+  document.querySelectorAll('.duty-toggle').forEach(el=>el.addEventListener('click', ()=>{
+    const id=parseInt(el.dataset.id);
+    const duty=MOCK.duties.find(d=>d.id===id);
+    if(duty){duty.done=!duty.done; render();}
+  }));
+
+  document.getElementById('dirSearch')?.addEventListener('input', e=>{
+    const q=e.target.value.toLowerCase();
+    document.querySelectorAll('.dir-row').forEach(row=>{
+      row.style.display=row.textContent.toLowerCase().includes(q)?'':'none';
+    });
+  });
+}
+
+// ===== INIT =====
+render();
+  </script>
+ </body>
+</html>
