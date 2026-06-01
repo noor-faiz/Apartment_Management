@@ -53,10 +53,10 @@
 // ===== MOCK DATA =====
 const MOCK = {
   users: [
-    { id:1, role:'admin', name:'Md. Rahim Uddin', namebn:'মো. রহিম উদ্দিন', email:'admin@sheltech.com', pass:'admin123', flat:'Office' },
-    { id:2, role:'owner', name:'Kamal Hossain', namebn:'কামাল হোসেন', email:'owner@sheltech.com', pass:'owner123', flat:'4A' },
-    { id:3, role:'tenant', name:'Jamal Ahmed', namebn:'জামাল আহমেদ', email:'tenant@sheltech.com', pass:'tenant123', flat:'6B' },
-    { id:4, role:'staff', name:'Abdul Karim', namebn:'আবদুল করিম', email:'staff@sheltech.com', pass:'staff123', flat:'Guard Post', staffRole:'Security Guard' }
+    { id:1, role:'admin', name:'Md. Rahim', namebn:'মো. রহিম', email:'admin@sheltech.com', pass:'admin123', flat:'Office' },
+    { id:2, role:'owner', name:'Md. Rahim', namebn:'মো. রহিম', email:'owner@sheltech.com', pass:'owner123', flat:'4A' },
+    { id:3, role:'tenant', name:'Md. Karim', namebn:'মো. করিম', email:'tenant@sheltech.com', pass:'tenant123', flat:'6B' },
+    { id:4, role:'staff', name:'Md. Karim', namebn:'মো. করিম', email:'staff@sheltech.com', pass:'staff123', flat:'Guard Post', staffRole:'Security Guard' }
   ],
   notices: [
     { id:1, title:'Water Pump Maintenance', titlebn:'পানির পাম্প রক্ষণাবেক্ষণ', body:'Water supply will be off from 10AM-2PM tomorrow.', bodybn:'আগামীকাল সকাল ১০টা থেকে দুপুর ২টা পর্যন্ত পানি সরবরাহ বন্ধ থাকবে।', date:'2025-01-15', priority:'high' },
@@ -64,16 +64,16 @@ const MOCK = {
     { id:3, title:'Eid Celebration', titlebn:'ঈদ উদযাপন', body:'Eid prayer will be held at rooftop. All are welcome.', bodybn:'ছাদে ঈদের নামাজ আদায় করা হবে। সকলকে স্বাগতম।', date:'2025-01-10', priority:'normal' }
   ],
   finances: [
-    { id:1, flat:'4A', month:'January 2025', amount:5500, status:'paid', date:'2025-01-05' },
-    { id:2, flat:'4A', month:'December 2024', amount:5500, status:'paid', date:'2024-12-03' },
-    { id:3, flat:'6B', month:'January 2025', amount:4500, status:'pending', date:null },
-    { id:4, flat:'6B', month:'December 2024', amount:4500, status:'overdue', date:null },
-    { id:5, flat:'3C', month:'January 2025', amount:5500, status:'paid', date:'2025-01-08' },
-    { id:6, flat:'5A', month:'January 2025', amount:5000, status:'pending', date:null }
+    { id:1, flat:'4A', month:'January 2025', amount:5000, status:'paid', date:'2025-01-05' },
+    { id:2, flat:'4A', month:'December 2024', amount:5000, status:'paid', date:'2024-12-03' },
+    { id:3, flat:'5B', month:'January 2025', amount:4500, status:'pending', date:null },
+    { id:4, flat:'3B', month:'December 2024', amount:4500, status:'overdue', date:null },
+    { id:5, flat:'3C', month:'January 2025', amount:4000, status:'paid', date:'2025-01-08' },
+    { id:6, flat:'5A', month:'January 2025', amount:4000, status:'pending', date:null }
   ],
   complaints: [
     { id:1, flat:'4A', type:'Plumbing', title:'Bathroom leak', titlebn:'বাথরুমে লিক', status:'open', date:'2025-01-14', assignee:null },
-    { id:2, flat:'6B', type:'Electrical', title:'Hallway light broken', titlebn:'হলওয়ের লাইট নষ্ট', status:'in_progress', date:'2025-01-10', assignee:'Electrician Rafiq' },
+    { id:2, flat:'5B', type:'Electrical', title:'Hallway light broken', titlebn:'হলওয়ের লাইট নষ্ট', status:'in_progress', date:'2025-01-10', assignee:'Electrician Rafiq' },
     { id:3, flat:'3C', type:'Security', title:'Gate lock damaged', titlebn:'গেটের তালা নষ্ট', status:'resolved', date:'2025-01-05', assignee:'Abdul Karim' }
   ],
   visitors: [
@@ -87,12 +87,12 @@ const MOCK = {
     { id:4, name:'Bilkis Begum', namebn:'বিলকিস বেগম', role:'Cleaner', rolebn:'পরিচ্ছন্নকর্মী', shift:'7AM-3PM', phone:'01556789012', photo:'🧹' }
   ],
   flats: [
-    { flat:'1A', owner:'Mr. Shahid', ownerbn:'মি. শহীদ', tenant:null, phone:'01711111111', emergency:'01722222222' },
-    { flat:'2A', owner:'Mrs. Fatema', ownerbn:'মিসেস ফাতেমা', tenant:'Rana Ahmed', phone:'01733333333', emergency:'01744444444' },
-    { flat:'3C', owner:'Mr. Habib', ownerbn:'মি. হাবিব', tenant:null, phone:'01755555555', emergency:'01766666666' },
-    { flat:'4A', owner:'Kamal Hossain', ownerbn:'কামাল হোসেন', tenant:'Sumon Khan', phone:'01777777777', emergency:'01788888888' },
-    { flat:'5A', owner:'Dr. Nasrin', ownerbn:'ডা. নাসরিন', tenant:null, phone:'01799999999', emergency:'01700000000' },
-    { flat:'6B', owner:'Mr. Alam', ownerbn:'মি. আলম', tenant:'Jamal Ahmed', phone:'01611111111', emergency:'01622222222' }
+    { flat:'1A', owner:'Md. Rahim', ownerbn:'মো. রহিম', tenant:null, phone:'01711111111', emergency:'01722222222' },
+    { flat:'2A', owner:'Md. Rahim', ownerbn:'মো. রহিম', tenant:'Rana Ahmed', phone:'01733333333', emergency:'01744444444' },
+    { flat:'3C', owner:'Md. Rahim', ownerbn:'মো. রহিম', tenant:null, phone:'01755555555', emergency:'01766666666' },
+    { flat:'4A', owner:'Md. Rahim', ownerbn:'মো. রহিম', tenant:'Sumon Khan', phone:'01777777777', emergency:'01788888888' },
+    { flat:'5A', owner:'Md. Rahim', ownerbn:'মো. রহিম', tenant:null, phone:'01799999999', emergency:'01700000000' },
+    { flat:'5B', owner:'Md. Rahim', ownerbn:'মো. রহিম', tenant:'Jamal Ahmed', phone:'01611111111', emergency:'01622222222' }
   ],
   bookings: [
     { id:1, facility:'Community Hall', facilitybn:'কমিউনিটি হল', flat:'4A', date:'2025-01-25', time:'6PM-10PM', status:'approved' },
