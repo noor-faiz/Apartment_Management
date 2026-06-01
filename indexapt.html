@@ -6,8 +6,7 @@
   <title>Sheltech Enclave Tower</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
-  <script src="/_sdk/element_sdk.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script>
     tailwind.config = {
       theme: {
@@ -45,10 +44,9 @@
     .stagger-2 { animation-delay: 0.2s; }
     .stagger-3 { animation-delay: 0.3s; }
     .stagger-4 { animation-delay: 0.4s; }
+    body { box-sizing: border-box; }
   </style>
-  <style>body { box-sizing: border-box; }</style>
-  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
- <script src="/_sdk/telemetry_sdk.js"></script></head>
+ </head>
  <body class="h-full bg-gradient-to-br from-slate-100 via-blue-50 to-slate-50 text-slate-800 overflow-hidden">
   <div id="app" class="h-full w-full"></div>
   <script>
@@ -165,7 +163,7 @@ let state = {
   user: JSON.parse(localStorage.getItem('user') || 'null'),
   page: 'dashboard',
   sidebarOpen: false,
-  view: 'home' // 'home', 'login', or 'app'
+  view: 'home'
 };
 
 function t(key) { return T[state.lang][key] || key; }
@@ -370,38 +368,38 @@ function renderHome() {
           <div class="glass rounded-xl p-6 border-2 border-blue-200 hover:shadow-xl transition">
             <div class="text-4xl mb-3">👨‍💼</div>
             <h3 class="font-bold text-slate-900 mb-2">${state.lang==='en'?'Admin':'অ্যাডমিন'}</h3>
-            <p class="text-xs text-slate-600 space-y-1">
+            <div class="text-xs text-slate-600 space-y-1">
               <div>✓ ${state.lang==='en'?'Full system access':'সম্পূর্ণ সিস্টেম অ্যাক্সেস'}</div>
               <div>✓ ${state.lang==='en'?'User management':'ব্যবহারকারী ব্যবস্থাপনা'}</div>
               <div>✓ ${state.lang==='en'?'Financial reports':'আর্থিক রিপোর্ট'}</div>
-            </p>
+            </div>
           </div>
           <div class="glass rounded-xl p-6 border-2 border-emerald-200 hover:shadow-xl transition">
             <div class="text-4xl mb-3">🏠</div>
             <h3 class="font-bold text-slate-900 mb-2">${state.lang==='en'?'Flat Owner':'ফ্ল্যাট মালিক'}</h3>
-            <p class="text-xs text-slate-600 space-y-1">
+            <div class="text-xs text-slate-600 space-y-1">
               <div>✓ ${state.lang==='en'?'View dues & receipts':'ডিউ এবং রসিদ দেখুন'}</div>
               <div>✓ ${state.lang==='en'?'Submit complaints':'অভিযোগ জমা দিন'}</div>
               <div>✓ ${state.lang==='en'?'Book facilities':'সুবিধা বুক করুন'}</div>
-            </p>
+            </div>
           </div>
           <div class="glass rounded-xl p-6 border-2 border-amber-200 hover:shadow-xl transition">
             <div class="text-4xl mb-3">👤</div>
             <h3 class="font-bold text-slate-900 mb-2">${state.lang==='en'?'Tenant (Varatia)':'ভাড়াটিয়া'}</h3>
-            <p class="text-xs text-slate-600 space-y-1">
+            <div class="text-xs text-slate-600 space-y-1">
               <div>✓ ${state.lang==='en'?'Pay rent & charges':'ভাড়া এবং চার্জ পরিশোধ করুন'}</div>
               <div>✓ ${state.lang==='en'?'Raise complaints':'অভিযোগ রেইজ করুন'}</div>
               <div>✓ ${state.lang==='en'?'View notices':'নোটিশ দেখুন'}</div>
-            </p>
+            </div>
           </div>
           <div class="glass rounded-xl p-6 border-2 border-rose-200 hover:shadow-xl transition">
             <div class="text-4xl mb-3">👔</div>
             <h3 class="font-bold text-slate-900 mb-2">${state.lang==='en'?'Staff':'কর্মচারী'}</h3>
-            <p class="text-xs text-slate-600 space-y-1">
+            <div class="text-xs text-slate-600 space-y-1">
               <div>✓ ${state.lang==='en'?'View daily duties':'দৈনিক দায়িত্ব দেখুন'}</div>
               <div>✓ ${state.lang==='en'?'Mark tasks done':'কাজ সম্পন্ন চিহ্নিত করুন'}</div>
               <div>✓ ${state.lang==='en'?'Log visitors':'দর্শনার্থী লগ করুন'}</div>
-            </p>
+            </div>
           </div>
         </div>
       </div>
@@ -709,11 +707,10 @@ function renderDuties() {
 
 // ===== EVENT BINDING =====
 function bindEvents() {
-  // Home page events
   document.getElementById('goToLogin')?.addEventListener('click', e=>{ e.preventDefault(); setState({view:'login'}); });
   document.getElementById('ctaLogin')?.addEventListener('click', e=>{ e.preventDefault(); setState({view:'login'}); });
   document.getElementById('backToHome')?.addEventListener('click', e=>{ e.preventDefault(); setState({view:'home'}); });
-  
+
   document.getElementById('loginBtn')?.addEventListener('click', e=>{
     e.preventDefault();
     const role = document.getElementById('loginRole').value;
@@ -774,14 +771,7 @@ function bindEvents() {
 }
 
 // ===== INIT =====
-const defaultConfig = { building_name: 'Sheltech Enclave Tower' };
-window.elementSdk.init({
-  defaultConfig,
-  onConfigChange: async(config)=>{ /* building name could update title if needed */ },
-  mapToCapabilities:(config)=>({ recolorables:[], borderables:[], fontEditable:undefined, fontSizeable:undefined }),
-  mapToEditPanelValues:(config)=>new Map([['building_name', config.building_name||defaultConfig.building_name]])
-});
 render();
-</script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a04b8cda1f833e4b',t:'MTc4MDI4ODkzMA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+  </script>
+ </body>
 </html>
